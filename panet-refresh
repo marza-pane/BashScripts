@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # This bash script is written for Debian 9.1
-# macchanger is needed.
+# What this script does is:
+# - stops all (I know) network related services
+# - put your wifi net devices down and change mac addresses
+# - restarts all services
+# NB: macchanger is needed (sudo apt-get install macchanger).
 
 test ! "$(whoami)" = "root" && echo -e "\n You must be root.\n" && exit 1
 
