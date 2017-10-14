@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# This bash script is written for Debian 9.1
+# macchanger is needed.
+
+test ! "$(whoami)" = "root" && echo -e "\n You must be root.\n" && exit 1
+
+printf "\nStopping services... "
+systemctl disable avahi-daemon.service 2>/dev/null
+systemctl stop avahi-daemon 2>/dev/null
+systemctl stop network-manager 2>/dev/null
+systemctl stop wpa_supplicant.service 2>/dev/null
+printf " done!\n"
+
+DEV_LIST=($(ls /sys/class/net/))
+for IWDEV in ${DEV_LIST[@]};do
+	if [ $(ls /sys/class/net/$IWDEV | grep -i 'phy80211') ];then
+		printf "\nChanging mac address of $IWDEV ($(cat /sys/class/net/$IWDEV/address) --> "
+		ip link set $IWDEV down &>/dev/null
+		macchanger -a $IWDEV &>/dev/null
+		ip link set $IWDEV up &>/dev/null
+		printf "$(cat /sys/class/net/$IWDEV/address))"		
+	fi
+done
+
+printf "\n\nRestarting services... "
+systemctl enable avahi-daemon.service 2>/dev/null
+systemctl start avahi-daemon 2>/dev/null
+systemctl start network-manager 2>/dev/null
+systemctl start wpa_supplicant.service 2>/dev/null
+printf "all done!\n"
